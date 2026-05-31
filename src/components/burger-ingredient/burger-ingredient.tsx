@@ -1,22 +1,40 @@
-import { FC, memo } from 'react';
-import { useLocation } from 'react-router-dom';
-
+import { FC } from 'react';
+import { useDispatch } from '../../services/store';
+import { addIngredient } from '../../services/slices/constructorSlice';
 import { BurgerIngredientUI } from '@ui';
-import { TBurgerIngredientProps } from './type';
+import { TIngredient } from '../../utils/types';
+import { Location } from 'react-router-dom';
 
-export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
-  ({ ingredient, count }) => {
-    const location = useLocation();
+type TBurgerIngredientProps = {
+  ingredient: TIngredient;
+  count: number;
+};
 
-    const handleAdd = () => {};
+export const BurgerIngredient: FC<TBurgerIngredientProps> = ({
+  ingredient,
+  count
+}) => {
+  const dispatch = useDispatch();
 
-    return (
-      <BurgerIngredientUI
-        ingredient={ingredient}
-        count={count}
-        locationState={{ background: location }}
-        handleAdd={handleAdd}
-      />
+  const handleAdd = () => {
+    dispatch(
+      addIngredient({
+        ...ingredient,
+        id: crypto.randomUUID()
+      })
     );
-  }
-);
+  };
+
+  const locationState = {} as {
+    background: Location;
+  };
+
+  return (
+    <BurgerIngredientUI
+      ingredient={ingredient}
+      count={count}
+      handleAdd={handleAdd}
+      locationState={locationState}
+    />
+  );
+};
