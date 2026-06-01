@@ -3,7 +3,6 @@ import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
 const URL =
   process.env.BURGER_API_URL || 'https://norma.education-services.ru/api';
-console.log('Using API URL:', URL);
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -173,8 +172,14 @@ export const registerUserApi = (data: TRegisterData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
-      return Promise.reject(data);
+      if (!data.success) {
+        return Promise.reject(data);
+      }
+
+      localStorage.setItem('refreshToken', data.refreshToken);
+      setCookie('accessToken', data.accessToken);
+
+      return data;
     });
 
 export type TLoginData = {
@@ -192,8 +197,14 @@ export const loginUserApi = (data: TLoginData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
-      return Promise.reject(data);
+      if (!data.success) {
+        return Promise.reject(data);
+      }
+
+      localStorage.setItem('refreshToken', data.refreshToken);
+      setCookie('accessToken', data.accessToken);
+
+      return data;
     });
 
 export const forgotPasswordApi = (data: { email: string }) =>
@@ -253,3 +264,5 @@ export const logoutApi = () =>
       token: localStorage.getItem('refreshToken')
     })
   }).then((res) => checkResponse<TServerResponse<{}>>(res));
+
+export type { TNewOrderResponse };

@@ -1,38 +1,70 @@
-import { FC } from 'react';
+import { FC, useMemo, useRef, useState } from 'react';
 import { useSelector } from '../../services/store';
 import { selectIngredients } from '../../services/selectors/ingredientsSelectors';
-import { BurgerIngredient } from '../burger-ingredient/burger-ingredient';
-import styles from '../ui/burger-ingredients/burger-ingredients.module.css';
-import { TIngredient } from '../../utils/types';
+
+import { BurgerIngredientsUI } from '@components';
+import { TIngredient, TTabMode } from '@utils-types';
 
 export const BurgerIngredients: FC = () => {
   const ingredients = useSelector(selectIngredients);
 
-  const buns = ingredients.filter((i: TIngredient) => i.type === 'bun');
+  const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
 
-  const sauces = ingredients.filter((i: TIngredient) => i.type === 'sauce');
+  const buns = useMemo(
+    () => ingredients.filter((i: TIngredient) => i.type === 'bun'),
+    [ingredients]
+  );
 
-  const mains = ingredients.filter((i: TIngredient) => i.type === 'main');
+  const mains = useMemo(
+    () => ingredients.filter((i: TIngredient) => i.type === 'main'),
+    [ingredients]
+  );
+
+  const sauces = useMemo(
+    () => ingredients.filter((i: TIngredient) => i.type === 'sauce'),
+    [ingredients]
+  );
+
+  const bunsRef = useRef<HTMLHeadingElement | null>(null);
+  const mainsRef = useRef<HTMLHeadingElement | null>(null);
+  const saucesRef = useRef<HTMLHeadingElement | null>(null);
+
+  const onTabClick = (value: string) => {
+    const tab = value as TTabMode;
+
+    setCurrentTab(tab);
+
+    const map: Record<TTabMode, HTMLElement | null> = {
+      bun: bunsRef.current,
+      main: mainsRef.current,
+      sauce: saucesRef.current
+    };
+
+    map[tab]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
 
   return (
-    <section className={styles.container}>
-      <h2 className='text text_type_main-medium'>Булки</h2>
-
-      {buns.map((bun: TIngredient) => (
-        <BurgerIngredient key={bun._id} ingredient={bun} count={0} />
-      ))}
-
-      <h2 className='text text_type_main-medium'>Соусы</h2>
-
-      {sauces.map((sauce: TIngredient) => (
-        <BurgerIngredient key={sauce._id} ingredient={sauce} count={0} />
-      ))}
-
-      <h2 className='text text_type_main-medium'>Начинки</h2>
-
-      {mains.map((main: TIngredient) => (
-        <BurgerIngredient key={main._id} ingredient={main} count={0} />
-      ))}
-    </section>
+    <BurgerIngredientsUI
+      currentTab={currentTab}
+      buns={buns}
+      mains={mains}
+      sauces={sauces}
+      onTabClick={onTabClick}
+      bunsRef={(node?: Element | null) => {
+        bunsRef.current = node as HTMLHeadingElement | null;
+      }}
+      mainsRef={(node?: Element | null) => {
+        mainsRef.current = node as HTMLHeadingElement | null;
+      }}
+      saucesRef={(node?: Element | null) => {
+        saucesRef.current = node as HTMLHeadingElement | null;
+      }}
+      titleBunRef={bunsRef}
+      titleMainRef={mainsRef}
+      titleSaucesRef={saucesRef}
+    />
   );
 };

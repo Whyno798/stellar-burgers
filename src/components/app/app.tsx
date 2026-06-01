@@ -45,17 +45,15 @@ const App: FC = () => {
   const isAuthChecked = useSelector(selectAuthChecked);
 
   useEffect(() => {
-    dispatch(getIngredientsThunk());
     dispatch(checkUserAuth());
+    dispatch(getIngredientsThunk());
   }, [dispatch]);
 
   const handleCloseModal = () => {
     navigate(-1);
   };
 
-  if (!isAuthChecked) {
-    return null;
-  }
+  if (!isAuthChecked) return null;
 
   return (
     <div className={styles.app}>
@@ -63,7 +61,6 @@ const App: FC = () => {
 
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
-
         <Route path='/feed' element={<Feed />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
 
@@ -81,7 +78,6 @@ const App: FC = () => {
         </Route>
 
         <Route path='/ingredients/:id' element={<IngredientDetails />} />
-
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
@@ -95,7 +91,6 @@ const App: FC = () => {
               </Modal>
             }
           />
-
           <Route
             path='/feed/:number'
             element={
@@ -104,7 +99,6 @@ const App: FC = () => {
               </Modal>
             }
           />
-
           <Route
             path='/profile/orders/:number'
             element={

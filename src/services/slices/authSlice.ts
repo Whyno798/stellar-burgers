@@ -3,7 +3,8 @@ import {
   getUserApi,
   loginUserApi,
   registerUserApi,
-  updateUserApi
+  updateUserApi,
+  logoutApi
 } from '../../utils/burger-api';
 import { TUser } from '../../utils/types';
 
@@ -23,35 +24,45 @@ const initialState: AuthState = {
   error: null
 };
 
-export const loginUserThunk = createAsyncThunk(
-  'auth/login',
-  async (data: { email: string; password: string }) => await loginUserApi(data)
-);
+export const loginUserThunk = createAsyncThunk<
+  { user: TUser },
+  { email: string; password: string }
+>('auth/login', async (data) => await loginUserApi(data));
 
-export const registerUserThunk = createAsyncThunk(
-  'auth/register',
-  async (data: { email: string; password: string; name: string }) =>
-    await registerUserApi(data)
-);
+export const registerUserThunk = createAsyncThunk<
+  { user: TUser },
+  { email: string; password: string; name: string }
+>('auth/register', async (data) => await registerUserApi(data));
 
-export const updateUserThunk = createAsyncThunk(
-  'auth/update',
-  async (data: { name: string; email: string; password?: string }) =>
-    await updateUserApi(data)
-);
+export const updateUserThunk = createAsyncThunk<
+  { user: TUser },
+  { name: string; email: string; password?: string }
+>('auth/update', async (data) => await updateUserApi(data));
 
-export const checkUserAuth = createAsyncThunk(
-  'auth/checkUser',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await getUserApi();
+export const checkUserAuth = createAsyncThunk<
+  TUser,
+  void,
+  { rejectValue: string }
+>('auth/checkUser', async (_, { rejectWithValue }) => {
+  try {
+    const res = await getUserApi();
+    return res.user;
+  } catch {
+    localStorage.removeItem('refreshToken');
+    return rejectWithValue('Пользователь не авторизован');
+  }
+});
 
-      return response.user;
-    } catch (error) {
-      localStorage.removeItem('refreshToken');
+export const logoutThunk = createAsyncThunk<boolean>(
+  'auth/logout',
+  async () => {
+    await logoutApi();
 
-      return rejectWithValue('Пользователь не авторизован');
-    }
+    localStorage.removeItem('refreshToken');
+    document.cookie =
+      'accessToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+
+    return true;
   }
 );
 
@@ -91,6 +102,7 @@ export const authSlice = createSlice({
 
       .addCase(updateUserThunk.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(updateUserThunk.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -116,6 +128,19 @@ export const authSlice = createSlice({
         state.user = null;
         state.isAuth = false;
         state.isAuthChecked = true;
+      })
+
+      .addCase(logoutThunk.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.isAuth = false;
+      })
+      .addCase(logoutThunk.rejected, (state) => {
+        state.isLoading = false;
+        state.error = 'Ошибка выхода';
       });
   }
 });
