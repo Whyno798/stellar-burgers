@@ -1,29 +1,21 @@
-import { FC, useMemo, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { useSelector } from '../../services/store';
-import { selectIngredients } from '../../services/selectors/ingredientsSelectors';
+
+import {
+  selectBuns,
+  selectMains,
+  selectSauces
+} from '../../services/selectors/ingredientsSelectors';
 
 import { BurgerIngredientsUI } from '@components';
-import { TIngredient, TTabMode } from '@utils-types';
+import { TTabMode } from '@utils-types';
 
 export const BurgerIngredients: FC = () => {
-  const ingredients = useSelector(selectIngredients);
+  const buns = useSelector(selectBuns);
+  const mains = useSelector(selectMains);
+  const sauces = useSelector(selectSauces);
 
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
-
-  const buns = useMemo(
-    () => ingredients.filter((i: TIngredient) => i.type === 'bun'),
-    [ingredients]
-  );
-
-  const mains = useMemo(
-    () => ingredients.filter((i: TIngredient) => i.type === 'main'),
-    [ingredients]
-  );
-
-  const sauces = useMemo(
-    () => ingredients.filter((i: TIngredient) => i.type === 'sauce'),
-    [ingredients]
-  );
 
   const bunsRef = useRef<HTMLHeadingElement | null>(null);
   const mainsRef = useRef<HTMLHeadingElement | null>(null);
