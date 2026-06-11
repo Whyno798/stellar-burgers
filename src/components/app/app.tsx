@@ -45,17 +45,15 @@ const App: FC = () => {
   const isAuthChecked = useSelector(selectAuthChecked);
 
   useEffect(() => {
-    dispatch(getIngredientsThunk());
     dispatch(checkUserAuth());
+    dispatch(getIngredientsThunk());
   }, [dispatch]);
 
   const handleCloseModal = () => {
     navigate(-1);
   };
 
-  if (!isAuthChecked) {
-    return null;
-  }
+  if (!isAuthChecked) return null;
 
   return (
     <div className={styles.app}>
@@ -63,9 +61,15 @@ const App: FC = () => {
 
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
-
         <Route path='/feed' element={<Feed />} />
-        <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route
+          path='/feed/:number'
+          element={
+            <div className={styles.detailPageWrap}>
+              <OrderInfo />
+            </div>
+          }
+        />
 
         <Route element={<ProtectedRoute onlyUnAuth isAuth={isAuth} />}>
           <Route path='/login' element={<Login />} />
@@ -77,11 +81,28 @@ const App: FC = () => {
         <Route element={<ProtectedRoute isAuth={isAuth} />}>
           <Route path='/profile' element={<Profile />} />
           <Route path='/profile/orders' element={<ProfileOrders />} />
-          <Route path='/profile/orders/:number' element={<OrderInfo />} />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <div className={styles.detailPageWrap}>
+                <OrderInfo />
+              </div>
+            }
+          />
         </Route>
 
-        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+        <Route
+          path='/ingredients/:id'
+          element={
+            <div className={styles.detailPageWrap}>
+              <p className={`text text_type_main-large ${styles.detailHeader}`}>
+                Детали ингредиента
+              </p>
 
+              <IngredientDetails />
+            </div>
+          }
+        />
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
@@ -95,7 +116,6 @@ const App: FC = () => {
               </Modal>
             }
           />
-
           <Route
             path='/feed/:number'
             element={
@@ -104,7 +124,6 @@ const App: FC = () => {
               </Modal>
             }
           />
-
           <Route
             path='/profile/orders/:number'
             element={

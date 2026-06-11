@@ -1,9 +1,11 @@
 import { FC } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import { useDispatch } from '../../services/store';
 import { addIngredient } from '../../services/slices/constructorSlice';
 import { BurgerIngredientUI } from '@ui';
+
 import { TIngredient } from '../../utils/types';
-import { Location } from 'react-router-dom';
 
 type TBurgerIngredientProps = {
   ingredient: TIngredient;
@@ -15,18 +17,10 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = ({
   count
 }) => {
   const dispatch = useDispatch();
+  const location = useLocation();
 
   const handleAdd = () => {
-    dispatch(
-      addIngredient({
-        ...ingredient,
-        id: crypto.randomUUID()
-      })
-    );
-  };
-
-  const locationState = {} as {
-    background: Location;
+    dispatch(addIngredient(ingredient));
   };
 
   return (
@@ -34,7 +28,9 @@ export const BurgerIngredient: FC<TBurgerIngredientProps> = ({
       ingredient={ingredient}
       count={count}
       handleAdd={handleAdd}
-      locationState={locationState}
+      locationState={{
+        background: location
+      }}
     />
   );
 };
