@@ -1,23 +1,54 @@
-import { FC, useMemo } from 'react';
+import { FC, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
+
+import { useDispatch, useSelector } from '../../services/store';
+
+import { selectIngredients } from '../../services/selectors/ingredientsSelectors';
+import { selectFeedOrders } from '../../services/selectors/feedSelectors';
+
+import {
+  selectOrders,
+  selectCurrentOrder
+} from '../../services/selectors/ordersSelectors';
+
+import {
+  getOrderByNumberThunk,
+  clearCurrentOrder
+} from '../../services/slices/ordersSlice';
+
 import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const dispatch = useDispatch();
 
-  const ingredients: TIngredient[] = [];
+  const { number } = useParams();
 
-  /* Готовим данные для отображения */
+  const ingredients = useSelector(selectIngredients);
+
+  const feedOrders = useSelector(selectFeedOrders);
+  const profileOrders = useSelector(selectOrders);
+
+  const currentOrder = useSelector(selectCurrentOrder);
+
+  const orderFromStore = [...feedOrders, ...profileOrders].find(
+    (item) => item.number === Number(number)
+  );
+
+  useEffect(() => {
+    if (!orderFromStore && number) {
+      dispatch(getOrderByNumberThunk(Number(number)));
+    }
+
+    return () => {
+      dispatch(clearCurrentOrder());
+    };
+  }, [dispatch, number, orderFromStore]);
+
+  const orderData = orderFromStore || currentOrder;
+
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -31,6 +62,7 @@ export const OrderInfo: FC = () => {
       (acc: TIngredientsWithCount, item) => {
         if (!acc[item]) {
           const ingredient = ingredients.find((ing) => ing._id === item);
+
           if (ingredient) {
             acc[item] = {
               ...ingredient,
