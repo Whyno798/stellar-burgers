@@ -1,21 +1,24 @@
-/**
- * For a detailed explanation regarding each configuration property, visit:
- * https://jestjs.io/docs/configuration
- */
-
 import type { JestConfigWithTsJest } from 'ts-jest';
 
 const config: JestConfigWithTsJest = {
-  // множество разных настроек
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+
   transform: {
-    // '^.+\\.[tj]sx?$' для обработки файлов js/ts с помощью `ts-jest`
-    // '^.+\\.m?[tj]sx?$' для обработки файлов js/ts/mjs/mts с помощью `ts-jest`
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        // настройки для ts-jest
+        tsconfig: 'tsconfig.json'
       }
     ]
+  },
+
+  testPathIgnorePatterns: ['/node_modules/', '/tests/'],
+
+  moduleNameMapper: {
+    '\\.(css|scss|sass)$': 'identity-obj-proxy'
   }
 };
 
